@@ -1,6 +1,6 @@
 {
   "name": "sockolate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sweet, Tasty WebSockets with enriched feature flavors",
   "types": "./index.d.ts",
   "main": "./dist/index.js",
@@ -27,13 +27,13 @@
     "events"
   ],
   "author": "Torathion",
-  "homepage": "https://github.com/Torathion/mini-timer",
+  "homepage": "https://github.com/Torathion/sockolate",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Torathion/mini-timer.git"
+    "url": "git+https://github.com/Torathion/sockolate.git"
   },
   "bugs": {
-    "url": "https://github.com/Torathion/mini-timer/issues"
+    "url": "https://github.com/Torathion/sockolate/issues"
   },
   "license": "MIT",
   "type": "module",

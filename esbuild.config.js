@@ -2,7 +2,6 @@ import { build } from 'esbuild'
 
 const buildOptions = {
   entryPoints: ['./src/index.ts'],
-  bundle: true,
   treeShaking: true,
   minify: true,
   platform: 'node',
