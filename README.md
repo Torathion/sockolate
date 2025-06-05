@@ -24,12 +24,14 @@
 While WebSockets are already feature-rich for secure and fast bidirectional data connections, many use cases require even more fine-grained WebSockets to easily handle errors or connection problems.
 Which is why `sockolate` enhances WebSockets with:
 
-- Reconnections
-- Inward and outward data buffering
-- Connection Pausing
+- [Extra Events](#events)
+- [Aborting Connections](#aborting-connections)
+- [Reconnections](#reconnections)
+- [Inward and outward data buffering](#pausing-and-buffers)
+- [Connection Pausing](#pausing-and-buffers)
 - Keep-Alive-Timers
-- Pinging
-- Heartbeat Connections
+- [Pinging](#pinging-and-heartbeat)
+- [Heartbeat Connections](#pinging-and-heartbeat)
 
 ## Usage
 
@@ -38,12 +40,12 @@ To use WebSockets, `sockolate` provides a `Socket` class that just works like a 
 ```typescript
 import Socket from 'sockolate'
 
-const socket = new Socket('ws://localhost:3000')
+const socket = new Socket('ws://localhost:3000/api')
 
 socket.connect()
 
 // Or shorter:
-new Socket('ws://localhost:3000', { immediate: true })
+new Socket('ws://localhost:3000/api', { immediate: true })
 ```
 
 ### Events
@@ -66,7 +68,7 @@ Furthermore, `Socket` distinguishes between central callbacks and events. Centra
 ```typescript
 import Socket from 'sockolate'
 
-const socket = new Socket('ws://localhost:3000')
+const socket = new Socket('ws://localhost:3000/api')
 
 // Central callbacks
 socket.onOpen(() => {})
@@ -80,6 +82,22 @@ socket.on('reconnect', () => {})
 socket.on('ping', () => {})
 ```
 
+### Aborting Connections
+
+`sockolate` extends WebSockets by being able to forcefully and manually close the connection and end server processing by utilizing `AbortController`s.
+It directly sends a signal of `{"type": "abort"}` that can be loaded with extra payload to handle the connection closure on the server side.
+
+```typescript
+import Socket from 'sockolate'
+
+const socket = new Socket('ws://localhost:3000/api')
+
+socket.connect()
+
+// Sends { "type": "abort", "payload": { "id": 123 } } to the server.
+socket.abort('Manual Closure', { id: 123 })
+```
+
 ### Reconnections
 
 When a connection receives an error, is aborted, closes or a reconnection was triggered manually, the `Socket` tries to disconnect and re-establish the connection:
@@ -87,7 +105,7 @@ When a connection receives an error, is aborted, closes or a reconnection was tr
 ```typescript
 import Socket from 'sockolate'
 
-const socket = new Socket('ws://localhost:3000', { retry: { amount: 4, minUpTime: 500, startDelay: 1000, maxDelay: 30000, onAbort: true }})
+const socket = new Socket('ws://localhost:3000/api', { retry: { amount: 4, minUpTime: 500, startDelay: 1000, maxDelay: 30000, onAbort: true }})
 
 socket.connect()
 socket.on('reconnect', () => {
@@ -108,7 +126,7 @@ socket.reconnect()
 ```typescript
 import Socket from 'sockolate'
 
-const socket = new Socket('ws://localhost:3000', { buffer: { max: 32, min: 0 }})
+const socket = new Socket('ws://localhost:3000/api', { buffer: { max: 32, min: 0 }})
 socket.connect()
 // Sending data
 socket.send('Test')
@@ -136,9 +154,11 @@ To keep WebSockets alive, `Socket` has not only an internal keepalive timer that
 import Socket from 'sockolate'
 
 // Defines a heartbeat interval of 3s, a ping timeout of 5s and strictly errors on no response.
-const socket = new Socket('ws://localhost:3000', { ping: { heartbeat: 3000, ping: 5000, strict: true }, timeout: 30000 })
+const socket = new Socket('ws://localhost:3000/api', { ping: { heartbeat: 3000, ping: 5000, strict: true }, timeout: 30000 })
 
 socket.connect()
+// Sends a signal of { "type": "ping" } to the server.
+// It expects a signal of { "type": "pong" } . In strict mode, it aborts, if no answer comes from the server.
 socket.ping()
 
 // Initiates the heartbeat.
