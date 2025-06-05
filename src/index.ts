@@ -403,15 +403,18 @@ export default class Socket<In = string, Out = any> {
 
     this.#retries++
     this.#retryCall = true
-    this.#timers.retry = setTimeout(() => {
-      this.#emitter.emit('reconnect')
-      if (!this.#ws || this.#ws.readyState === WebSocket.CLOSED) this.connect()
-      else {
-        this.disconnect()
-        this.connect()
-      }
-      this.#retryCall = false
-    }, min(retry.startDelay * ((this.#retries + 1) * retry.delayFactor), retry.maxDelay))
+    this.#timers.retry = setTimeout(
+      () => {
+        this.#emitter.emit('reconnect')
+        if (!this.#ws || this.#ws.readyState === WebSocket.CLOSED) this.connect()
+        else {
+          this.disconnect()
+          this.connect()
+        }
+        this.#retryCall = false
+      },
+      min(retry.startDelay * ((this.#retries + 1) * retry.delayFactor), retry.maxDelay)
+    )
   }
 
   /**
