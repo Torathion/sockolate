@@ -1,6 +1,6 @@
 import type { RetryConfig } from 'src/interfaces'
 import type { SocketEvent, UrlProvider } from 'src/types'
-import { min } from 'compresso'
+import { min, parseJson, stringify } from 'compresso'
 import { type Client, Server } from 'mock-socket'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Socket from '../src'
@@ -729,6 +729,48 @@ describe('Socket', () => {
 
       expect(errorData).toBeInstanceOf(Error)
       expect(errorData!.message).toContain('test')
+    })
+
+    it('should not abort on pause', async () => {
+      const socket = new Socket(URL)
+      let counter = 0
+      const count = () => {
+        counter++
+      }
+      socket.on('abort', count)
+      socket.on('error', count)
+
+      socket.abort()
+      await waitForConnection(socket)
+
+      socket.pause()
+      socket.abort()
+
+      socket.disconnect()
+      socket.abort()
+
+      expect(counter).toBe(0)
+    })
+
+    it('sends an abort signal with payload to the server to close the connection', async () => {
+      const localSocket = new Socket(URL)
+      let sentMessage: string | undefined
+
+      localSocket.on('data', data => {
+        sentMessage = data.data
+      })
+
+      server.on('connection', socket => {
+        socket.on('message', data => {
+          socket.send(data)
+        })
+      })
+
+      await waitForConnection(localSocket)
+      localSocket.abort('Test', { id: 123 })
+      await waitForSocketEvent(localSocket, 'data')
+
+      expect(parseJson(sentMessage!)).toEqual({ type: 'abort', payload: { id: 123 } })
     })
   })
 

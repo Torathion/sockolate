@@ -131,8 +131,10 @@ declare module 'sockolate' {
     constructor(provider: UrlProvider, options?: DeepPartial<SocketConfig>)
     /**
      *  Forces the WebSocket to close and disconnect, due to an error.
+     *  Sends an abort signal to the server that can be loaded with extra payload.
      *
      *  @param reason - the reason for the forced closure.
+     *  @param payload - the extra data to send as server connection closure handling.
      */
     abort(reason?: string | Error): void
     /**
