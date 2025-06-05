@@ -115,6 +115,11 @@ export default class Socket<In = string, Out = any> {
     }
   }
 
+  private error(reason?: string | Error): void {
+    const errorAbort = isError(reason)
+    this.#emitter.emit(errorAbort ? 'error' : 'abort', errorAbort ? reason : new Error(reason))
+  }
+
   /**
    *  Clears all stored timers, whether running or not.
    */
@@ -212,16 +217,17 @@ export default class Socket<In = string, Out = any> {
 
   /**
    *  Forces the WebSocket to close and disconnect, due to an error.
+   *  Sends an abort signal to the server that can be loaded with extra payload.
    *
    *  @param reason - the reason for the forced closure.
+   *  @param payload - the extra data to send as server connection closure handling.
    */
-  abort(reason?: string | Error): void {
+  abort(reason?: string | Error, payload?: Out): void {
+    if (!this.#ws || !this.active) return
+    this.send({ payload, type: 'abort' } as Out)
     this.#controller?.abort(reason)
     if (this.#opts.retry.onAbort) this.reconnect()
-    else {
-      const errorAbort = isError(reason)
-      this.#emitter.emit(errorAbort ? 'error' : 'abort', errorAbort ? reason : new Error(reason))
-    }
+    else this.error(reason)
   }
 
   /**
@@ -249,7 +255,7 @@ export default class Socket<In = string, Out = any> {
       this.#closeCall = false
       this.#disconnectCall = false
     } catch (err) {
-      this.abort(new Error(`Error when trying to connect to server: ${(err as Error).message}`))
+      this.error(new Error(`Error when trying to connect to server: ${(err as Error).message}`))
     }
   }
 
