@@ -136,7 +136,7 @@ declare module 'sockolate' {
      *  @param reason - the reason for the forced closure.
      *  @param payload - the extra data to send as server connection closure handling.
      */
-    abort(reason?: string | Error): void
+    abort(reason?: string | Error, payload?: Out): void
     /**
      *  Connects the WebSocket to the server of the given URL.
      */
