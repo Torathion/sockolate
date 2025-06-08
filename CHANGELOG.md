@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.1.1] 06-08-2025
+
+### Fixed
+
+- Missing `payload` argument in `abort` method type declaration
+
 ## [1.1.0] 06-05-2025
 
 ### Added
