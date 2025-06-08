@@ -1,6 +1,6 @@
 import type { RetryConfig } from 'src/interfaces'
 import type { SocketEvent, UrlProvider } from 'src/types'
-import { min, parseJson, stringify } from 'compresso'
+import { min, parseJson } from 'compresso'
 import { type Client, Server } from 'mock-socket'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Socket from '../src'
